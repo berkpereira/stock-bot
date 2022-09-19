@@ -5,6 +5,6 @@
 # Code source: https://github.com/oduwsdl/tweetedat
 from datetime import datetime
 def get_utc_datetime(tid):
-    offset = 1288834974657
+    offset = 1288834974657 # tweet ID timestamp offset
     unix_tstamp = (tid >> 22) + offset
-    return datetime.utcfromtimestamp(unix_tstamp/1000.0)
+    return datetime.utcfromtimestamp(unix_tstamp/1000.0) # convert from miliseconds to seconds from epoch
