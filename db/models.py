@@ -1,6 +1,6 @@
 import peewee as pw
 
-db = pw.SqliteDatabase('stockbot42.db')
+db = pw.SqliteDatabase('./bot/stockbot42.db') # initialize database in the bot/ directory
 
 class BaseModel(pw.Model):
     class Meta:
