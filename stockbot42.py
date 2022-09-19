@@ -1,7 +1,7 @@
 import twitter_credentials
 import tweepy
 import time
-from get_tweet_timestamp import get_tweet_timestamp
+from tweet_time import get_utc_datetime
 
 
 # Authenticate to Twitter
