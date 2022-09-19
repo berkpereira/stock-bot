@@ -1,8 +1,8 @@
 import twitter_credentials
 import tweepy
 import time
+from get_tweet_timestamp import get_tweet_timestamp
 
-twitter_credentials.API_KEY
 
 # Authenticate to Twitter
 auth = tweepy.OAuthHandler(twitter_credentials.API_KEY, twitter_credentials.API_KEY_SECRET)
@@ -14,6 +14,7 @@ api = tweepy.API(auth, wait_on_rate_limit=True)
 # Keep a register of the IDs of the tweets already responded to, avoids duplicate responses
 replied_to = set()
 
+"""
 # First trial run of a basic continuously running bot operation loop
 while True:
 	mentions = api.mentions_timeline()
@@ -24,3 +25,4 @@ while True:
 			print(f'Tweeted in response to {mention.user.screen_name}')
 			time.sleep(10)
 		time.sleep(10)
+"""
