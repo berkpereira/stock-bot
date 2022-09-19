@@ -1,3 +1,4 @@
+from db.models import Mention, db
 import twitter_credentials
 import tweepy
 import time
