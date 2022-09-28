@@ -1,5 +1,6 @@
+from itertools import count
 import sys
-sys.path.insert(0, 'db')
+sys.path.insert(0, 'db') # this allows the program to find the models module
 from models import Mention, db
 import twitter_credentials
 import tweepy
@@ -15,9 +16,8 @@ auth.set_access_token(twitter_credentials.ACCESS_TOKEN, twitter_credentials.ACCE
 api = tweepy.API(auth, wait_on_rate_limit=True)
 
 
-# THIS IS THE FUNCTION WHERE WE WILL TAKE CARE OF WHAT TO DO
-# TO GET THE RELEVANT OUTPUT TO TWEET DEPENDING ON SOME USER'S
-# REQUEST/COMMAND TWEET
+# this function takes in a tweet object, and returns what's read as the user's command to the
+# bot, along with an appropriate response string to use in the bot's tweet reply
 def user_command_response(tweet):
 	tweet_words = tweet.text.split()
 	author_name = tweet.author.name.split()[0] # tweet author's first name
@@ -26,36 +26,58 @@ def user_command_response(tweet):
 	if command == 'HELP' or command == None: # case where the tweet body includes the @mention and nothing else
 		response = (f'Hi, {author_name}! I can help you learn the important facts about some given ticker.\n'
 					'For example, if you want to learn about the AAPL ticker, tweet "@stockbot42 AAPL"\n\n'
-					'beep boop, I am a bot by @berkpereira')
+					"beep boop, I'm a bot")
 	else: # case where user did input some attempted command, will try to find the ticker using the yfinance module
 		ticker = yf.Ticker(command) # creates yfinance.Ticker object
-		try: # now we try to fetch the information about the user's given ticker
-			isin = ticker.get_isin() # attempts to get the ticker's ISIN
-			
+		try: # now we try to fetch the information about the user's given ticker, assuming we find it
+			isin = ticker.get_isin() # get the ticker's ISIN
+			company_name = ticker.info['shortName']
+			current_price = ticker.info['regularMarketPrice']
+			beta = ticker.info['beta']
+
+			# the below are 52 week target prices from multiple analysts' reports
+			target_high = ticker.info['targetHighPrice']
+			target_median = ticker.info['targetMedianPrice']
+			target_low = ticker.info['targetLowPrice']
+			no_analysts = ticker.info['numberOfAnalystOpinions']
+
+			response = (f'Got it! Here\'s info on {command}:\n\n'
+						f'Price: {current_price}\n'
+						f'Beta: {beta}\n'
+						f'Median price target: {target_median} (from {no_analysts} analysts)\n\n'
+						"beep boop, I'm a bot")
 		except: # if we get some error, most likely due to the ticker info not being found, we respond with an error message
-			response = (f'Sorry, could not find the {command} ticker.\n'
+			response = ('Sorry, something went wrong.\n'
 						"Please make sure that you've tweeted in the correct format.\n"
 						'For example, if you want to learn about the AAPL ticker, tweet "@stockbot42 AAPL"\n\n'
-						'beep boop, I am a bot by @berkpereira')
-						
-
-	return response
+						"beep boop, I'm a bot")
+	return command, response
 
 
 
 # First trial run of a basic continuously running bot operation loop
+#def bot_watch():
 def bot_watch():
 	while True:
-		mentions = api.mentions_timeline(count=50) # retrieve 50 latest tweet @mentions
+		mentions = api.mentions_timeline(count=10) # retrieve 10 latest tweet @mentions
 		for mention in mentions:
 			mention_id = mention.id_str # take the mention tweet's id as a string
+			author_screen_name = mention.author.screen_name
 			search_query = Mention.select().where(Mention.tweet_id == mention_id) # search for the mention id within the bot's db
-			
+
+			print(f'looking at tweet by {author_screen_name}: {mention.text}')
+			print(f'query count: {search_query.count()}')
+			print()
 			# case where the mention was not found in db, i.e., not yet replied to
 			# we're not keeping bot's own tweets in db, so we need to check for those cases too
-			if search_query.count == 0 and mention.author.screen_name != 'stockbot42':
-				api.update_status(status=f'Hello, {mention.user.name}!', in_reply_to_status_id=mention.id_str, auto_populate_reply_metadata=True)
-				# replied_to.add(mention.id_str)
+			if search_query.count() == 0 and mention.author.screen_name != 'stockbot42':
+				command, response = user_command_response(mention) # get the tweet's command and corresponding response
+				api.update_status(status=response, in_reply_to_status_id=mention.id_str, auto_populate_reply_metadata=True)
 				print(f'Tweeted in response to {mention.user.screen_name}')
-				time.sleep(10)
-			time.sleep(10)
+				new_mention = Mention.create(tweet_id=mention_id, user_command=command, user_screen_name=author_screen_name)
+				new_mention.save()
+				print(f'Saved tweet {mention_id} to bot database.')
+				print()
+			time.sleep(5)
+
+bot_watch()
