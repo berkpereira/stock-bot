@@ -1,7 +1,10 @@
-from db.models import Mention, db
+import sys
+sys.path.insert(0, 'db')
+from models import Mention, db
 import twitter_credentials
 import tweepy
 import time
+import yfinance as yf
 
 
 # Authenticate to Twitter
@@ -25,11 +28,11 @@ def user_command_response(tweet):
 					'For example, if you want to learn about the AAPL ticker, tweet "@stockbot42 AAPL"\n\n'
 					'beep boop, I am a bot by @berkpereira')
 	else: # case where user did input some attempted command, will try to find the ticker using the yfinance module
-		ticker = yf.Ticker(command)
-		try:
-			isin = ticker.get_isin() # this attempts to get the ticker's ISIN
+		ticker = yf.Ticker(command) # creates yfinance.Ticker object
+		try: # now we try to fetch the information about the user's given ticker
+			isin = ticker.get_isin() # attempts to get the ticker's ISIN
 			
-		except:
+		except: # if we get some error, most likely due to the ticker info not being found, we respond with an error message
 			response = (f'Sorry, could not find the {command} ticker.\n'
 						"Please make sure that you've tweeted in the correct format.\n"
 						'For example, if you want to learn about the AAPL ticker, tweet "@stockbot42 AAPL"\n\n'
