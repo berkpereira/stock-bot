@@ -1,7 +1,4 @@
-from itertools import count
-import sys
-sys.path.insert(0, 'db') # this allows the program to find the models module
-from models import Mention, db
+from models import Mention
 import twitter_credentials
 import tweepy
 import time
@@ -78,4 +75,4 @@ def bot_watch():
 				print()
 			time.sleep(5)
 
-bot_watch()
+# bot_watch()
