@@ -31,21 +31,19 @@ def user_command_response(tweet):
 		ticker = yf.Ticker(command) # creates yfinance.Ticker object
 		try: # now we try to fetch the information about the user's given ticker, assuming we find it
 			isin = ticker.get_isin() # get the ticker's ISIN
-			company_name = ticker.info['shortName']
 			current_price = ticker.info['regularMarketPrice']
 			beta = ticker.info['beta']
 
 			# the below are 52 week target prices from multiple analysts' reports
-			target_high = ticker.info['targetHighPrice']
 			target_median = ticker.info['targetMedianPrice']
-			target_low = ticker.info['targetLowPrice']
-			no_analysts = ticker.info['numberOfAnalystOpinions']
+			no_analysts = ticker.info['numberOfAnalystOpinions'] if ticker.info['numberOfAnalystOpinions'] != None else '0'
 
 			response = (f'Got it! Here\'s info on {command}:\n\n'
 						f'Price: {current_price}\n'
 						f'Beta: {beta}\n'
 						f'Median price target: {target_median} (from {no_analysts} analysts)\n\n'
 						"beep boop, I'm a bot")
+						
 		except: # if we get some error, most likely due to the ticker info not being found, we respond with an error message
 			response = ('Sorry, something went wrong.\n'
 						"Please make sure that you've tweeted in the correct format.\n"
