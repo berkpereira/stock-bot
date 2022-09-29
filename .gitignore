@@ -1,5 +1,6 @@
 env/
 __pycache__/
+db/
 twitter_credentials.py
 .vscode/
 .obsidian/
