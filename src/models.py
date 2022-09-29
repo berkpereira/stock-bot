@@ -1,6 +1,6 @@
 import peewee as pw
 
-db = pw.SqliteDatabase('./bot/stockbot42.db') # initialize database in the bot/ directory
+db = pw.SqliteDatabase('./stockbot42.db') # initialize database in the bot/ directory
 
 # base model to be inherited by all other models
 # makes the already defined db the default for all new models
