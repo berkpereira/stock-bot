@@ -1,7 +1,8 @@
 env/
 __pycache__/
-db/
-twitter_credentials.py
+populate.py
+retrieve.py
+src/twitter_credentials.py
 .vscode/
 .obsidian/
 notes.md
