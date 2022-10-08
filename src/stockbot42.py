@@ -4,7 +4,6 @@ import tweepy
 import time
 import yfinance as yf
 
-
 # initialise tweepy api object
 def init_api():
 	# authenticate to twitter using credentials
@@ -13,7 +12,6 @@ def init_api():
 	# create API object
 	api = tweepy.API(auth, wait_on_rate_limit=True)
 	return api
-
 
 # this function takes in a tweet object, and returns what's read as the user's command to the
 # bot, along with an appropriate response string to use in the bot's tweet reply
@@ -50,10 +48,7 @@ def user_command_response(tweet):
 						"beep boop, I'm a bot")
 	return command, response
 
-
-
-# First trial run of a basic continuously running bot operation loop
-#def bot_watch():
+# bot's operating loop
 def bot_watch(api):
 	while True:
 		mentions = api.mentions_timeline(count=10) # retrieve 10 latest tweet @mentions
@@ -78,4 +73,5 @@ def bot_watch(api):
 			time.sleep(5)
 
 if __name__ == '__main__':
+	# run the bot loop
 	bot_watch(init_api())
