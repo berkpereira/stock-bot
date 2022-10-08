@@ -18,8 +18,9 @@ def init_api():
 def user_command_response(tweet):
 	tweet_words = tweet.text.split()
 	author_name = tweet.author.name.split()[0] # tweet author's first name
-	command = next(filter(lambda word: word != '@stockbot42', tweet_words), None).upper() # this fetches the tweet's first word that isn't the @mention 
-	
+	command = next(filter(lambda word: word != '@stockbot42', tweet_words), None) # this fetches the tweet's first word that isn't the @mention 
+	if command != None:
+		command = command.upper() # make command uppercase
 	if command == 'HELP' or command == None: # case where the tweet body includes the @mention and nothing else
 		response = (f'Hi, {author_name}! I can help you learn the important facts about some given ticker.\n'
 					'For example, if you want to learn about the AAPL ticker, tweet "@stockbot42 AAPL"\n\n'
@@ -49,7 +50,8 @@ def user_command_response(tweet):
 	return command, response
 
 # bot's operating loop
-def bot_watch(api):
+def lambda_handler(event, context):
+	api = init_api()
 	while True:
 		mentions = api.mentions_timeline(count=10) # retrieve 10 latest tweet @mentions
 		for mention in mentions:
@@ -74,4 +76,4 @@ def bot_watch(api):
 
 if __name__ == '__main__':
 	# run the bot loop
-	bot_watch(init_api())
+	lambda_handler(event=None, context=None)
