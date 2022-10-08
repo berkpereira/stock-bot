@@ -5,12 +5,14 @@ import time
 import yfinance as yf
 
 
-# Authenticate to Twitter
-auth = tweepy.OAuthHandler(twitter_credentials.API_KEY, twitter_credentials.API_KEY_SECRET)
-auth.set_access_token(twitter_credentials.ACCESS_TOKEN, twitter_credentials.ACCESS_TOKEN_SECRET)
-
-# Create API object
-api = tweepy.API(auth, wait_on_rate_limit=True)
+# initialise tweepy api object
+def init_api():
+	# authenticate to twitter using credentials
+	auth = tweepy.OAuthHandler(twitter_credentials.API_KEY, twitter_credentials.API_KEY_SECRET)
+	auth.set_access_token(twitter_credentials.ACCESS_TOKEN, twitter_credentials.ACCESS_TOKEN_SECRET)
+	# create API object
+	api = tweepy.API(auth, wait_on_rate_limit=True)
+	return api
 
 
 # this function takes in a tweet object, and returns what's read as the user's command to the
@@ -52,7 +54,7 @@ def user_command_response(tweet):
 
 # First trial run of a basic continuously running bot operation loop
 #def bot_watch():
-def bot_watch():
+def bot_watch(api):
 	while True:
 		mentions = api.mentions_timeline(count=10) # retrieve 10 latest tweet @mentions
 		for mention in mentions:
@@ -75,4 +77,5 @@ def bot_watch():
 				print()
 			time.sleep(5)
 
-# bot_watch()
+if __name__ == '__main__':
+	bot_watch(init_api())
