@@ -28,7 +28,7 @@ def user_command_response(tweet):
 	else: # case where user did input some attempted command, will try to find the ticker using the yfinance module
 		ticker = yf.Ticker(command) # creates yfinance.Ticker object
 		try: # now we try to fetch the information about the user's given ticker, assuming we find it
-			isin = ticker.get_isin() # get the ticker's ISIN
+			isin = ticker.get_isin() # this is only here because it reliably throws an exception, whereas other methods might just go after returning a null value
 			current_price = ticker.info['regularMarketPrice']
 			beta = ticker.info['beta']
 
@@ -47,32 +47,37 @@ def user_command_response(tweet):
 						"Please make sure that you've tweeted in the correct format.\n"
 						'For example, if you want to learn about the AAPL ticker, tweet "@stockbot42 AAPL"\n\n'
 						"beep boop, I'm a bot")
-	return command, response
+	return response
+
+# this function returns the tweet ids of the 30 latest tweets the bot has responded to
+def get_responded_to_ids(api):
+	responded_set = set()
+	responses = api.user_timeline(count=30)
+	for tweet in responses:
+		if tweet.in_reply_to_status_id_str is not None:
+			responded_set.add(tweet.in_reply_to_status_id_str)
+	return responded_set
 
 # bot's operating loop
 def lambda_handler(event, context):
 	api = init_api()
-	while True:
-		mentions = api.mentions_timeline(count=10) # retrieve 10 latest tweet @mentions
-		for mention in mentions:
-			mention_id = mention.id_str # take the mention tweet's id as a string
-			author_screen_name = mention.author.screen_name
-			search_query = Mention.select().where(Mention.tweet_id == mention_id) # search for the mention id within the bot's db
-
-			print(f'looking at tweet by {author_screen_name}: {mention.text}')
-			print(f'query count: {search_query.count()}')
-			print()
-			# case where the mention was not found in db, i.e., not yet replied to
-			# we're not keeping bot's own tweets in db, so we need to check for those cases too
-			if search_query.count() == 0 and mention.author.screen_name != 'stockbot42':
-				command, response = user_command_response(mention) # get the tweet's command and corresponding response
-				api.update_status(status=response, in_reply_to_status_id=mention.id_str, auto_populate_reply_metadata=True)
-				print(f'Tweeted in response to {mention.user.screen_name}')
-				new_mention = Mention.create(tweet_id=mention_id, user_command=command, user_screen_name=author_screen_name)
-				new_mention.save()
-				print(f'Saved tweet {mention_id} to bot database.')
-				print()
-			time.sleep(5)
+	responded_set = get_responded_to_ids(api)
+	mentions = api.mentions_timeline(count=30) # retrieve 30 latest tweet @mentions
+	for mention in mentions:
+		print(f'looking at tweet by {mention.author.screen_name}: {mention.text}')
+		
+		if mention.id_str in responded_set or mention.author.screen_name == 'stockbot42':
+			print('Had already responded to this tweet, or it\'s my own! Moving on...')
+			continue
+		
+		print()
+		
+		response = user_command_response(mention) # get the tweet's command and corresponding response
+		api.update_status(status=response, in_reply_to_status_id=mention.id_str, auto_populate_reply_metadata=True)
+		print(f'Tweeted in response to {mention.user.screen_name}')
+		time.sleep(2)
+		print()
+	print('Finished looking at all mentions. Bye!')
 
 if __name__ == '__main__':
 	# run the bot loop
