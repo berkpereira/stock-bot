@@ -76,8 +76,12 @@ def lambda_handler(event, context):
     responded_set = get_responded_to_ids(api)
     # retrieve 30 latest tweet @mentions
     mentions = api.mentions_timeline(count=30)
+    t_end = time.time() + 25
 
     for mention in mentions:
+        if time.time() > t_end:
+            break
+        
         print(f'looking at tweet by {mention.author.screen_name}: {mention.text}')
 
         if mention.id_str in responded_set or mention.author.screen_name == 'stockbot42':
