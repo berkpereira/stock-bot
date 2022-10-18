@@ -1,9 +1,8 @@
 env/
 __pycache__/
-populate.py
-retrieve.py
 src/twitter_credentials.py
 .vscode/
 .obsidian/
 notes.md
-src/stockbot42.db
+lambda_function.zip
+layer.zip
