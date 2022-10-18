@@ -1,2 +1,3 @@
 # stock-bot
-Still at a preliminary stage, this project consists of a stock-market-related Twitter bot (@stockbot42) that will respond to Twitter user requests, notify significant market events, etc., by using stock market data by Yahoo! Finance.
+This is the repo for the Twitter bot @stockbot42.
+The bot, hosted on AWS Lambda, responds to tweets like '@stockbot42 AAPL' by giving useful summary info on the user's requested ticker. The market information is obtained via the yfinance library for Python, which pulls the data from Yahoo! Finance.
